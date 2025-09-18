@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YU Lottery - Telegram Mini App</title>
+    <title>Star Lottery - Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -113,34 +113,27 @@
             font-weight: 600;
         }
 
-        .bet-controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 12px;
-            padding: 12px 16px;
+        .bet-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             margin: 16px 0;
         }
 
-        .bet-amount {
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .bet-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .bet-button {
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+        .bet-option {
+            background-color: var(--tg-theme-secondary-bg-color);
             border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
+            border-radius: 10px;
+            padding: 12px;
             font-weight: 600;
             cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .bet-option.selected {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
         }
 
         .action-button {
@@ -210,18 +203,6 @@
             margin-bottom: 8px;
         }
 
-        .stars {
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            margin: 12px 0;
-        }
-
-        .star {
-            color: #ffc107;
-            font-size: 24px;
-        }
-
         .telegram-button {
             background-color: var(--tg-theme-button-color);
             color: var(--tg-theme-button-text-color);
@@ -233,17 +214,61 @@
             margin-top: 8px;
             display: inline-block;
         }
+
+        .payment-section {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+
+        .payment-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .payment-option:last-child {
+            border-bottom: none;
+        }
+
+        .payment-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .loader {
+            border: 4px solid var(--tg-theme-secondary-bg-color);
+            border-top: 4px solid var(--tg-theme-button-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>YU Лотерея</h1>
+            <h1>Star Лотерея</h1>
         </div>
 
         <div class="balance">
             <span>Ваш баланс:</span>
-            <span class="balance-amount">1000 YU</span>
+            <span class="balance-amount" id="balance">0 ⭐</span>
         </div>
 
         <div class="section">
@@ -277,167 +302,242 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Сумма ставки</div>
-            <div class="bet-controls">
-                <div class="bet-amount">50 YU</div>
-                <div class="bet-buttons">
-                    <button class="bet-button" data-change="-10">-10</button>
-                    <button class="bet-button" data-change="-50">-50</button>
-                    <button class="bet-button" data-change="+10">+10</button>
-                    <button class="bet-button" data-change="+50">+50</button>
-                </div>
+            <div class="section-title">Выберите ставку</div>
+            <div class="bet-options">
+                <button class="bet-option" data-bet="15">15 ⭐</button>
+                <button class="bet-option" data-bet="25">25 ⭐</button>
+                <button class="bet-option" data-bet="50">50 ⭐</button>
+                <button class="bet-option" data-bet="100">100 ⭐</button>
             </div>
         </div>
 
-        <button class="action-button" id="play-button">Сыграть (50 YU)</button>
+        <button class="action-button" id="play-button">Сыграть (15 ⭐)</button>
+
+        <div class="payment-section">
+            <div class="section-title">Пополнить баланс</div>
+            <div class="payment-option">
+                <div>15 звезд</div>
+                <button class="payment-button" id="buy-15">Купить</button>
+            </div>
+            <div class="payment-option">
+                <div>50 звезд</div>
+                <button class="payment-button" id="buy-50">Купить</button>
+            </div>
+            <div class="payment-option">
+                <div>100 звезд</div>
+                <button class="payment-button" id="buy-100">Купить</button>
+            </div>
+        </div>
 
         <div class="premium-section">
             <div class="premium-title">Премиум версия</div>
             <p>Получите больше шансов на выигрыш и эксклюзивные возможности!</p>
-            <div class="stars">
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-            </div>
             <p>Всего за 15 звезд</p>
-            <button class="telegram-button">Купить через Telegram</button>
+            <button class="telegram-button" id="buy-premium">Купить через Telegram</button>
         </div>
 
         <div class="section history">
             <div class="section-title">История игр</div>
-            <div class="history-list">
-                <div class="history-item">
-                    <div class="history-symbol">
-                        <span class="history-icon">💎</span>
-                        <span>Алмаз</span>
-                    </div>
-                    <div class="history-result history-win">+150 YU</div>
-                </div>
-                <div class="history-item">
-                    <div class="history-symbol">
-                        <span class="history-icon">🌹</span>
-                        <span>Роза</span>
-                    </div>
-                    <div class="history-result history-loss">-50 YU</div>
-                </div>
-                <div class="history-item">
-                    <div class="history-symbol">
-                        <span class="history-icon">🐻</span>
-                        <span>Медведь</span>
-                    </div>
-                    <div class="history-result history-win">+200 YU</div>
-                </div>
+            <div class="history-list" id="history-list">
+                <div class="loader" id="history-loader"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Инициализация Telegram Web App
+        const BOT_TOKEN = '8232129797:AAHmtF3yVaC65j5UFja3ubDdg5g9V_WiiIk';
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Текущее состояние игры
         let state = {
-            balance: 1000,
-            betAmount: 50,
+            balance: 0,
+            betAmount: 15,
             selectedSymbol: null,
-            history: []
+            history: [],
+            userData: null
         };
 
-        // Элементы DOM
-        const balanceElement = document.querySelector('.balance-amount');
-        const betAmountElement = document.querySelector('.bet-amount');
+        const balanceElement = document.getElementById('balance');
         const playButton = document.getElementById('play-button');
         const symbolItems = document.querySelectorAll('.symbol-item');
-        const betButtons = document.querySelectorAll('.bet-button');
+        const betOptions = document.querySelectorAll('.bet-option');
+        const historyList = document.getElementById('history-list');
+        const historyLoader = document.getElementById('history-loader');
+        const buy15Button = document.getElementById('buy-15');
+        const buy50Button = document.getElementById('buy-50');
+        const buy100Button = document.getElementById('buy-100');
+        const buyPremiumButton = document.getElementById('buy-premium');
 
-        // Обновление отображения баланса
-        function updateBalance() {
-            balanceElement.textContent = `${state.balance} YU`;
+        async function initUser() {
+            const user = tg.initDataUnsafe?.user;
+            if (!user) return;
+            
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUserData`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.ok) {
+                    state.userData = data.result;
+                    state.balance = data.result.balance || 0;
+                    state.history = data.result.history || [];
+                    updateBalance();
+                    updateHistory();
+                } else {
+                    await createUser(user);
+                }
+            } catch (error) {
+                console.error('Error initializing user:', error);
+                await createUser(user);
+            }
         }
 
-        // Обновление отображения суммы ставки
-        function updateBetAmount() {
-            betAmountElement.textContent = `${state.betAmount} YU`;
-            playButton.textContent = `Сыграть (${state.betAmount} YU)`;
+        async function createUser(user) {
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/createUser`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        username: user.username,
+                        balance: 15,
+                        history: []
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.ok) {
+                    state.userData = data.result;
+                    state.balance = 15;
+                    updateBalance();
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+            }
+        }
+
+        async function updateUserData() {
+            if (!state.userData) return;
             
-            // Блокировка кнопки, если ставка больше баланса или не выбран символ
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/updateUser`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: state.userData.user_id,
+                        balance: state.balance,
+                        history: state.history
+                    })
+                });
+            } catch (error) {
+                console.error('Error updating user data:', error);
+            }
+        }
+
+        function updateBalance() {
+            balanceElement.textContent = `${state.balance} ⭐`;
+        }
+
+        function updateBetAmount() {
+            playButton.textContent = `Сыграть (${state.betAmount} ⭐)`;
             playButton.disabled = state.betAmount > state.balance || state.selectedSymbol === null;
         }
 
-        // Выбор символа
         symbolItems.forEach(item => {
             item.addEventListener('click', () => {
-                // Снимаем выделение со всех символов
                 symbolItems.forEach(symbol => symbol.classList.remove('selected'));
-                
-                // Выделяем выбранный символ
                 item.classList.add('selected');
-                
-                // Сохраняем выбранный символ
                 state.selectedSymbol = item.dataset.symbol;
-                
-                // Разблокируем кнопку игры, если сумма ставки корректна
                 updateBetAmount();
             });
         });
 
-        // Изменение суммы ставки
-        betButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const change = parseInt(button.dataset.change);
-                let newBetAmount = state.betAmount + change;
-                
-                // Ограничения на сумму ставки
-                if (newBetAmount < 10) newBetAmount = 10;
-                if (newBetAmount > state.balance) newBetAmount = state.balance;
-                
-                state.betAmount = newBetAmount;
+        betOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                betOptions.forEach(bet => bet.classList.remove('selected'));
+                option.classList.add('selected');
+                state.betAmount = parseInt(option.dataset.bet);
                 updateBetAmount();
             });
         });
 
-        // Обработка нажатия кнопки игры
-        playButton.addEventListener('click', () => {
+        playButton.addEventListener('click', async () => {
             if (state.betAmount > state.balance || state.selectedSymbol === null) return;
             
-            // Симуляция игры - 50% шанс на выигрыш
-            const isWin = Math.random() > 0.5;
-            const winMultiplier = isWin ? 3 : 0; // Выигрыш в 3 раза больше ставки
-            const winAmount = isWin ? state.betAmount * winMultiplier : 0;
+            const isWin = Math.random() < 0.02;
+            const winMultiplier = 2 + (state.betAmount / 100);
+            const winAmount = isWin ? Math.floor(state.betAmount * winMultiplier) : 0;
             
-            // Обновление баланса
             state.balance = state.balance - state.betAmount + winAmount;
             
-            // Добавление в историю
             state.history.unshift({
                 symbol: state.selectedSymbol,
                 bet: state.betAmount,
                 win: winAmount,
-                isWin: isWin
+                isWin: isWin,
+                timestamp: new Date().toISOString()
             });
             
-            // Обновление отображения
             updateBalance();
             updateHistory();
+            updateUserData();
             
-            // Показ результата
             showResult(isWin, winAmount);
         });
 
-        // Обновление истории игр
-        function updateHistory() {
-            const historyList = document.querySelector('.history-list');
-            historyList.innerHTML = '';
+        function buyStars(amount) {
+            if (!state.userData) return;
             
-            state.history.slice(0, 5).forEach(item => {
+            tg.showPopup({
+                title: 'Покупка звезд',
+                message: `Оплата ${amount} звезд...`,
+                buttons: [{type: 'ok'}]
+            });
+            
+            setTimeout(() => {
+                state.balance += amount;
+                updateBalance();
+                updateBetAmount();
+                updateUserData();
+                
+                tg.showPopup({
+                    title: 'Успешно!',
+                    message: `Вы приобрели ${amount} звезд!`,
+                    buttons: [{type: 'ok'}]
+                });
+            }, 1500);
+        }
+
+        buy15Button.addEventListener('click', () => buyStars(15));
+        buy50Button.addEventListener('click', () => buyStars(50));
+        buy100Button.addEventListener('click', () => buyStars(100));
+        buyPremiumButton.addEventListener('click', () => buyStars(15));
+
+        function updateHistory() {
+            if (state.history.length === 0) {
+                historyList.innerHTML = '<div class="history-item">История игр пуста</div>';
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            state.history.slice(0, 10).forEach(item => {
                 const historyItem = document.createElement('div');
                 historyItem.className = 'history-item';
                 
-                // Получаем emoji для символа
                 const symbolEmoji = getSymbolEmoji(item.symbol);
                 const symbolName = getSymbolName(item.symbol);
                 
@@ -447,7 +547,7 @@
                         <span>${symbolName}</span>
                     </div>
                     <div class="history-result ${item.isWin ? 'history-win' : 'history-loss'}">
-                        ${item.isWin ? '+' : '-'}${item.bet} YU
+                        ${item.isWin ? '+' : '-'}${item.bet} ⭐
                     </div>
                 `;
                 
@@ -455,7 +555,6 @@
             });
         }
 
-        // Получение emoji для символа
         function getSymbolEmoji(symbol) {
             const emojis = {
                 'ring': '💍',
@@ -468,7 +567,6 @@
             return emojis[symbol] || '❓';
         }
 
-        // Получение названия символа
         function getSymbolName(symbol) {
             const names = {
                 'ring': 'Кольцо',
@@ -481,12 +579,11 @@
             return names[symbol] || 'Неизвестно';
         }
 
-        // Показ результата игры
         function showResult(isWin, amount) {
             if (isWin) {
                 tg.showPopup({
                     title: 'Поздравляем!',
-                    message: `Вы выиграли ${amount} YU!`,
+                    message: `Вы выиграли ${amount} ⭐!`,
                     buttons: [{type: 'ok'}]
                 });
             } else {
@@ -498,8 +595,9 @@
             }
         }
 
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            betOptions[0].classList.add('selected');
+            await initUser();
             updateBalance();
             updateBetAmount();
         });
