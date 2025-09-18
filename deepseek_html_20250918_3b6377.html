@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YU Lottery - Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #222222;
+            --tg-theme-button-color: #40a7e3;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f1f1f1;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-link-color: #2481cc;
+            --tg-theme-header-bg-color: #ffffff;
+            --tg-theme-accent-text-color: #2481cc;
+            --tg-theme-section-bg-color: #ffffff;
+            --tg-theme-section-header-text-color: #2481cc;
+            --tg-theme-subtitle-text-color: #999999;
+            --tg-theme-destructive-text-color: #e53935;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 16px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 16px 0;
+            background-color: var(--tg-theme-header-bg-color);
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .balance {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin: 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-amount {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .section {
+            margin: 20px 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--tg-theme-section-header-text-color);
+        }
+
+        .symbols-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .symbol-item {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .symbol-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .symbol-item.selected {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
+
+        .symbol-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .symbol-name {
+            font-weight: 600;
+        }
+
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 16px 0;
+        }
+
+        .bet-amount {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .bet-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .bet-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .action-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: opacity 0.2s;
+        }
+
+        .action-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .history {
+            margin-top: 24px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
+        }
+
+        .history-symbol {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-icon {
+            font-size: 20px;
+        }
+
+        .history-result {
+            font-weight: 600;
+        }
+
+        .history-win {
+            color: #31b545;
+        }
+
+        .history-loss {
+            color: var(--tg-theme-destructive-text-color);
+        }
+
+        .premium-section {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .premium-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin: 12px 0;
+        }
+
+        .star {
+            color: #ffc107;
+            font-size: 24px;
+        }
+
+        .telegram-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>YU Лотерея</h1>
+        </div>
+
+        <div class="balance">
+            <span>Ваш баланс:</span>
+            <span class="balance-amount">1000 YU</span>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Выберите символ</div>
+            <div class="symbols-grid">
+                <div class="symbol-item" data-symbol="ring">
+                    <div class="symbol-icon">💍</div>
+                    <div class="symbol-name">Кольцо</div>
+                </div>
+                <div class="symbol-item" data-symbol="cup">
+                    <div class="symbol-icon">🏆</div>
+                    <div class="symbol-name">Кубок</div>
+                </div>
+                <div class="symbol-item" data-symbol="heart">
+                    <div class="symbol-icon">❤️</div>
+                    <div class="symbol-name">Сердце</div>
+                </div>
+                <div class="symbol-item" data-symbol="bear">
+                    <div class="symbol-icon">🐻</div>
+                    <div class="symbol-name">Медведь</div>
+                </div>
+                <div class="symbol-item" data-symbol="diamond">
+                    <div class="symbol-icon">💎</div>
+                    <div class="symbol-name">Алмаз</div>
+                </div>
+                <div class="symbol-item" data-symbol="rose">
+                    <div class="symbol-icon">🌹</div>
+                    <div class="symbol-name">Роза</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Сумма ставки</div>
+            <div class="bet-controls">
+                <div class="bet-amount">50 YU</div>
+                <div class="bet-buttons">
+                    <button class="bet-button" data-change="-10">-10</button>
+                    <button class="bet-button" data-change="-50">-50</button>
+                    <button class="bet-button" data-change="+10">+10</button>
+                    <button class="bet-button" data-change="+50">+50</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="action-button" id="play-button">Сыграть (50 YU)</button>
+
+        <div class="premium-section">
+            <div class="premium-title">Премиум версия</div>
+            <p>Получите больше шансов на выигрыш и эксклюзивные возможности!</p>
+            <div class="stars">
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+            <p>Всего за 15 звезд</p>
+            <button class="telegram-button">Купить через Telegram</button>
+        </div>
+
+        <div class="section history">
+            <div class="section-title">История игр</div>
+            <div class="history-list">
+                <div class="history-item">
+                    <div class="history-symbol">
+                        <span class="history-icon">💎</span>
+                        <span>Алмаз</span>
+                    </div>
+                    <div class="history-result history-win">+150 YU</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-symbol">
+                        <span class="history-icon">🌹</span>
+                        <span>Роза</span>
+                    </div>
+                    <div class="history-result history-loss">-50 YU</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-symbol">
+                        <span class="history-icon">🐻</span>
+                        <span>Медведь</span>
+                    </div>
+                    <div class="history-result history-win">+200 YU</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Текущее состояние игры
+        let state = {
+            balance: 1000,
+            betAmount: 50,
+            selectedSymbol: null,
+            history: []
+        };
+
+        // Элементы DOM
+        const balanceElement = document.querySelector('.balance-amount');
+        const betAmountElement = document.querySelector('.bet-amount');
+        const playButton = document.getElementById('play-button');
+        const symbolItems = document.querySelectorAll('.symbol-item');
+        const betButtons = document.querySelectorAll('.bet-button');
+
+        // Обновление отображения баланса
+        function updateBalance() {
+            balanceElement.textContent = `${state.balance} YU`;
+        }
+
+        // Обновление отображения суммы ставки
+        function updateBetAmount() {
+            betAmountElement.textContent = `${state.betAmount} YU`;
+            playButton.textContent = `Сыграть (${state.betAmount} YU)`;
+            
+            // Блокировка кнопки, если ставка больше баланса или не выбран символ
+            playButton.disabled = state.betAmount > state.balance || state.selectedSymbol === null;
+        }
+
+        // Выбор символа
+        symbolItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Снимаем выделение со всех символов
+                symbolItems.forEach(symbol => symbol.classList.remove('selected'));
+                
+                // Выделяем выбранный символ
+                item.classList.add('selected');
+                
+                // Сохраняем выбранный символ
+                state.selectedSymbol = item.dataset.symbol;
+                
+                // Разблокируем кнопку игры, если сумма ставки корректна
+                updateBetAmount();
+            });
+        });
+
+        // Изменение суммы ставки
+        betButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const change = parseInt(button.dataset.change);
+                let newBetAmount = state.betAmount + change;
+                
+                // Ограничения на сумму ставки
+                if (newBetAmount < 10) newBetAmount = 10;
+                if (newBetAmount > state.balance) newBetAmount = state.balance;
+                
+                state.betAmount = newBetAmount;
+                updateBetAmount();
+            });
+        });
+
+        // Обработка нажатия кнопки игры
+        playButton.addEventListener('click', () => {
+            if (state.betAmount > state.balance || state.selectedSymbol === null) return;
+            
+            // Симуляция игры - 50% шанс на выигрыш
+            const isWin = Math.random() > 0.5;
+            const winMultiplier = isWin ? 3 : 0; // Выигрыш в 3 раза больше ставки
+            const winAmount = isWin ? state.betAmount * winMultiplier : 0;
+            
+            // Обновление баланса
+            state.balance = state.balance - state.betAmount + winAmount;
+            
+            // Добавление в историю
+            state.history.unshift({
+                symbol: state.selectedSymbol,
+                bet: state.betAmount,
+                win: winAmount,
+                isWin: isWin
+            });
+            
+            // Обновление отображения
+            updateBalance();
+            updateHistory();
+            
+            // Показ результата
+            showResult(isWin, winAmount);
+        });
+
+        // Обновление истории игр
+        function updateHistory() {
+            const historyList = document.querySelector('.history-list');
+            historyList.innerHTML = '';
+            
+            state.history.slice(0, 5).forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                // Получаем emoji для символа
+                const symbolEmoji = getSymbolEmoji(item.symbol);
+                const symbolName = getSymbolName(item.symbol);
+                
+                historyItem.innerHTML = `
+                    <div class="history-symbol">
+                        <span class="history-icon">${symbolEmoji}</span>
+                        <span>${symbolName}</span>
+                    </div>
+                    <div class="history-result ${item.isWin ? 'history-win' : 'history-loss'}">
+                        ${item.isWin ? '+' : '-'}${item.bet} YU
+                    </div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Получение emoji для символа
+        function getSymbolEmoji(symbol) {
+            const emojis = {
+                'ring': '💍',
+                'cup': '🏆',
+                'heart': '❤️',
+                'bear': '🐻',
+                'diamond': '💎',
+                'rose': '🌹'
+            };
+            return emojis[symbol] || '❓';
+        }
+
+        // Получение названия символа
+        function getSymbolName(symbol) {
+            const names = {
+                'ring': 'Кольцо',
+                'cup': 'Кубок',
+                'heart': 'Сердце',
+                'bear': 'Медведь',
+                'diamond': 'Алмаз',
+                'rose': 'Роза'
+            };
+            return names[symbol] || 'Неизвестно';
+        }
+
+        // Показ результата игры
+        function showResult(isWin, amount) {
+            if (isWin) {
+                tg.showPopup({
+                    title: 'Поздравляем!',
+                    message: `Вы выиграли ${amount} YU!`,
+                    buttons: [{type: 'ok'}]
+                });
+            } else {
+                tg.showPopup({
+                    title: 'Не повезло',
+                    message: 'Попробуйте еще раз!',
+                    buttons: [{type: 'ok'}]
+                });
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBalance();
+            updateBetAmount();
+        });
+    </script>
+</body>
+</html>
